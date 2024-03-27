@@ -1,0 +1,19 @@
+{
+    "name": "avanchov/slot-engine",
+    "autoload": {
+        "psr-4": {
+            "Core\\": "core/",
+            "Core\\Controllers\\": "core/Controllers/",
+            "Core\\Models\\": "core/Models/",
+            "Core\\Services\\": "core/Services/"
+        }
+    },
+    "authors": [
+        {
+            "name": "AlexVanchov",
+            "email": "36050251+AlexVanchov@users.noreply.github.com"
+        }
+    ],
+    "require": {
+    }
+}
