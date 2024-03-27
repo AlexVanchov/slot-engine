@@ -1,0 +1,26 @@
+# Editor directories and files #
+.idea
+.vscode
+*.bak
+
+# PHP specific #
+/vendor/
+composer.lock
+composer.phar
+
+# Log files #
+*.log
+*.cache
+
+# Cache directories #
+cache/
+!web/cache/
+tmp/
+
+# Other common directories to ignore #
+storage/logs/
+vendor/
+src/
+
+# Specific files #
+/config/db.php
