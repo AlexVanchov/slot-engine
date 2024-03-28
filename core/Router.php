@@ -30,7 +30,6 @@ class Router {
 	/**
 	 * Direct the request to the appropriate controller method
 	 *
-	 * @param string $uri
 	 * @return void
 	 * @throws Exception
 	 */
@@ -39,12 +38,13 @@ class Router {
 		// check if router url it to web/assets OR vendor
 		if (str_starts_with($this->uri, 'web')) {
 			// Serve the requested asset
-			$assetPath = __DIR__ . '/../' . $this->uri;
-			if (file_exists($assetPath)) {
-				header('Content-Type: ' . mime_content_type($assetPath));
-				readfile($assetPath);
+			$asset = __DIR__ . "/../{$this->uri}";
+			if (file_exists($asset)) {
+				header('Content-Type: ' . $_SERVER['HTTP_ACCEPT'] ?? 'text/plain');
+				readfile($asset);
 			} else {
 				http_response_code(404);
+				echo '404 Not Found';
 			}
 		} else {
 			// Route the request

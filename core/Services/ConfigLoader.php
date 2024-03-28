@@ -2,6 +2,11 @@
 
 namespace Core\Services;
 
+/**
+ * This class loads the configuration from a JSON file.
+ * Class ConfigLoader
+ * @package Core\Services
+ */
 class ConfigLoader {
 	private array $config;
 
@@ -25,21 +30,30 @@ class ConfigLoader {
 		return $this->config;
 	}
 
-	// Optional: Add specific getters for parts of the config you access frequently
-	// This can simplify usage and reduce potential for typos in array keys throughout your code
-
+	/**
+	 * @return array
+	 */
 	public function getTiles(): array {
 		return $this->config['tiles'] ?? [];
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getReels(): array {
-		return $this->config['reels'][0] ?? []; // Assumes there's only one set of reels defined
+		return $this->config['reels'] ?? [];
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getLines(): array {
 		return $this->config['lines'] ?? [];
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getPays(): array {
 		return $this->config['pays'] ?? [];
 	}

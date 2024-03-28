@@ -2,14 +2,23 @@
 
 namespace Core;
 
+/**
+ * This class is a simple dependency injection container.
+ * Class AppContainer
+ * @package Core
+ */
 class AppContainer
 {
-	private static $instance;
-	private $services = [];
+	private static AppContainer $instance;
+	private array $services = [];
 
 	private function __construct() {}
 
-	public static function getInstance()
+	/**
+	 * Get the singleton instance of the AppContainer
+	 * @return AppContainer
+	 */
+	public static function getInstance(): AppContainer
 	{
 		if (null === static::$instance) {
 			static::$instance = new static();
@@ -18,12 +27,23 @@ class AppContainer
 		return static::$instance;
 	}
 
-	public function set($key, $value)
+	/**
+	 * Set a service in the container
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public function set($key, $value): void
 	{
 		$this->services[$key] = $value;
 	}
 
-	public function get($key)
+	/**
+	 * Get a service from the container
+	 * @param string $key
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	public function get($key): mixed
 	{
 		if (!isset($this->services[$key])) {
 			throw new \Exception("Service {$key} not found in container.");

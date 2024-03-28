@@ -1,10 +1,20 @@
 <?php
-// core/Controllers/ControllerBase.php
 
 namespace Core\Controllers;
 
+/**
+ * Class ControllerBase
+ * @package Core\Controllers
+ */
 abstract class ControllerBase {
-	protected function render($viewName, $data = []) {
+	/**
+	 * Render a view
+	 * @param string $viewName
+	 * @param array $data
+	 * @return void
+	 */
+	protected function render(string $viewName, array $data = []): void
+	{
 		extract($data);
 
 		$viewPath = __DIR__ . '/../../views/' . $viewName . '.php';

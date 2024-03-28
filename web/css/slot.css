@@ -1,0 +1,44 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    text-align: center;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+}
+
+.reel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px;
+}
+
+.reel span {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.reel img {
+    width: 100px;
+    height: 100px;
+}
+
+#slotMachineScreen {
+    margin-top: 20px;
+}
+
+#btn-spin {
+    margin-top: 20px;
+    font-size: 1.5em;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
