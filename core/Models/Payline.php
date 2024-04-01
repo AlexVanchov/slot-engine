@@ -26,17 +26,4 @@ class Payline
     {
         return $this->positions;
     }
-
-    /**
-     * Evaluate the payline
-     * @return array
-     */
-    public function evaluatePayline(): array
-    {
-        $payline = [];
-        $payline[] = $this->positions[0];
-        $payline[] = $this->positions[1];
-        $payline[] = $this->positions[2];
-        return $payline;
-    }
 }

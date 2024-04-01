@@ -104,6 +104,9 @@ class SlotMachine
     {
         $this->screen = []; // This will hold the 5x3 grid of symbols
 
+	    /**
+	     * @var Reel $reel
+	     */
         foreach ($this->config_reels as $reelIndex => $reel) {
             $symbols = $reel->getSymbols();
             $symbolsCount = count($symbols);
