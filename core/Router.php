@@ -35,6 +35,7 @@ class Router {
 	 */
 	public function direct(): void
 	{
+		// Note: Ugly wat to do that (not the main focus)
 		// check if router url it to web/assets OR vendor
 		if (str_starts_with($this->uri, 'web')) {
 			// Serve the requested asset

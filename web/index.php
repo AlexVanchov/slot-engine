@@ -11,14 +11,15 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // Instantiate the dependency injection container
 $appContainer = AppContainer::getInstance();
-
-$appContainer->set('configLoader', new ConfigLoader());
-$appContainer->set('slotMachine', new SlotMachine());
 $appContainer->set('router', new Router());
-
+/**
+ * @var $router Router
+ */
 $router = $appContainer->get('router');
 // Register routes
 $router->register('spin', 'GameController@index');
+
+$appContainer->set('configLoader', new ConfigLoader());
+$appContainer->set('slotMachine', new SlotMachine());
+
 $router->direct();
-
-

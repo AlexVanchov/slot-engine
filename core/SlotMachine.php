@@ -11,7 +11,7 @@ class SlotMachine
 {
 	private ConfigLoader $configLoader;
 	private array $reels = [];
-	private array $paylines = [];
+	private array $lines = [];
 	private array $tiles = [];
 	private array $pays = [];
 	private float $stake;
@@ -55,7 +55,7 @@ class SlotMachine
 
 		// Load paylines
 		foreach ($this->configLoader->getLines() as $lineConfig) {
-			$this->paylines[] = new Payline($lineConfig);
+			$this->lines[] = new Payline($lineConfig);
 		}
 
 		// Load pays
@@ -112,12 +112,13 @@ class SlotMachine
 		/**
 		 * @var Payline $line
 		 */
-		foreach ($this->paylines as $line) {
+		foreach ($this->lines as $line) {
 			$prevSymbolId = null;
 			$matchCount = 0;
 			$matches = [];
 
-			foreach ($line->getPositions() as $position => $row) {
+			$positions = $line->getPositions();
+			foreach ($positions as $position => $row) {
 				$currentSymbol = $this->screen[$position][$row];
 				if ($prevSymbolId === null || $currentSymbol->id === $prevSymbolId) {
 					$matchCount++;
@@ -125,7 +126,7 @@ class SlotMachine
 				} else {
 					if (count(array_unique($matches)) === 1 && $matchCount >= 3) {
 						$wins[] = [
-							'line' => $line->getPositions(),
+							'line' => $positions,
 							'matches' => $matches,
 							'count' => $matchCount,
 							'moneyWon' => $this->lookupPayout($matches, $matchCount),
@@ -141,7 +142,7 @@ class SlotMachine
 			// Check if the last sequence of symbols forms a win
 			if (count(array_unique($matches)) === 1 && $matchCount >= 3) {
 				$wins[] = [
-					'line' => $line->getPositions(),
+					'line' => $positions,
 					'matches' => $matches,
 					'count' => $matchCount,
 					'moneyWon' => $this->lookupPayout($matches, $matchCount),

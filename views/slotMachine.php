@@ -38,48 +38,34 @@
     </form>
 </div>
 <div id="slotMachineScreenResults" class="row">
-<?php
-        ?>
-
-        <div>
-            <h2>Results</h2>
-            <?php if (!empty($result['paylines'])): ?>
-                <?php
-                $totalMoneyWon = 0;
-                ?>
-                <ul>
-                    <?php foreach ($result['paylines'] as $payline): ?>
-                        <li>
-                            Line: <?= implode(', ', $payline['line']) ?>,
-                            Matches: <?= implode(', ', $payline['matches']) ?>,
-                            Count: <?= $payline['count'] ?>
-                            Money Won: <?= $payline['moneyWon'] ?>$
-                        </li>
-                        <?php
-                        $totalMoneyWon += $payline['moneyWon'];
-                        ?>
-                    <?php endforeach; ?>
-                </ul>
-                <p>Total money won: <?= $totalMoneyWon ?>$</p>
-            <?php else: ?>
-                <p>No paylines won</p>
-            <?php endif; ?>
-        </div>
+    <div>
+        <h2>Results</h2>
+        <?php if (!empty($result['paylines'])): ?>
+            <?php
+            $totalMoneyWon = 0;
+            ?>
+            <ul>
+                <?php foreach ($result['paylines'] as $payline): ?>
+                    <li>
+                        Line: <?= implode(', ', $payline['line']) ?>,
+                        Matches: <?= implode(', ', $payline['matches']) ?>,
+                        Count: <?= $payline['count'] ?>
+                        Money Won: <?= $payline['moneyWon'] ?>$
+                    </li>
+                    <?php
+                    $totalMoneyWon += $payline['moneyWon'];
+                    ?>
+                <?php endforeach; ?>
+            </ul>
+            <p>Total money won: <?= $totalMoneyWon ?>$</p>
+        <?php else: ?>
+            <p>No paylines won</p>
+        <?php endif; ?>
     </div>
-    <?php
-//    echo "<pre>";
-////    var_dump($result['paylines']);
-//    // there are objects in the array, so we need to convert them to arrays in json encode
-//
-////    $json = json_encode($result['paylines'], JSON_PRETTY_PRINT);
-//    var_dump($result['paylines'][0]['line']);
-//    var_dump(json_encode($result['paylines'][0]['line']));
-//    exit;
-
-    ?>
+</div>
 <script>
     const winningLines = <?= json_encode($result['paylines']); ?>;
 </script>
-    <script src="/web/js/slot.js"></script>
+<script src="/web/js/slot.js"></script>
 </body>
 </html>

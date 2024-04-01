@@ -20,7 +20,7 @@ class AppContainer
 	 */
 	public static function getInstance(): AppContainer
 	{
-		if (null === static::$instance) {
+		if (is_null(static::$instance)) {
 			static::$instance = new static();
 		}
 
@@ -32,7 +32,7 @@ class AppContainer
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	public function set($key, $value): void
+	public function set(string $key, mixed $value): void
 	{
 		$this->services[$key] = $value;
 	}
@@ -43,7 +43,7 @@ class AppContainer
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	public function get($key): mixed
+	public function get(string $key): mixed
 	{
 		if (!isset($this->services[$key])) {
 			throw new \Exception("Service {$key} not found in container.");
