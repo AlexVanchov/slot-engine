@@ -7,13 +7,21 @@ use Core\Models\Reel;
 use Core\Models\Symbol;
 use Core\Services\ConfigLoader;
 
+/**
+ * This class represents the slot machine game. It handles spinning the reels and evaluating the paylines.
+ * It uses the ConfigLoader to load the configuration from a JSON file.
+ * It uses the Symbol, Reel, and Payline classes to represent the game entities.
+ *
+ * Class SlotMachine
+ * @package Core
+ */
 class SlotMachine
 {
     private ConfigLoader $configLoader;
-    private array $reels = [];
-    private array $lines = [];
-    private array $tiles = [];
-    private array $pays = [];
+    private array $config_reels = [];
+    private array $config_lines = [];
+    private array $config_tiles = [];
+    private array $config_pays = [];
     private float $stake;
 
     /**
@@ -21,8 +29,11 @@ class SlotMachine
      */
     private array $details = [];
     private array $screen = [];
-    private array $paylines_result = [];
+    private array $paylines = [];
 
+    /**
+     * @throws \Exception
+     */
     public function __construct()
     {
         $appContainer = AppContainer::getInstance();
@@ -38,7 +49,7 @@ class SlotMachine
     {
         // Load symbols (tiles)
         foreach ($this->configLoader->getTiles() as $tileConfig) {
-            $this->tiles[$tileConfig['id']] = new Symbol(
+            $this->config_tiles[$tileConfig['id']] = new Symbol(
                 $tileConfig['id'],
                 $tileConfig['type']
             );
@@ -48,34 +59,40 @@ class SlotMachine
         foreach ($this->configLoader->getReels()[0] as $reelConfig) {
             $reel = new Reel();
             foreach ($reelConfig as $symbolId) {
-                $reel->addSymbol($this->tiles[$symbolId]);
+                $reel->addSymbol($this->config_tiles[$symbolId]);
             }
-            $this->reels[] = $reel;
+            $this->config_reels[] = $reel;
         }
 
         // Load paylines
         foreach ($this->configLoader->getLines() as $lineConfig) {
-            $this->lines[] = new Payline($lineConfig);
+            $this->config_lines[] = new Payline($lineConfig);
         }
 
         // Load pays
-        $this->pays = $this->configLoader->getPays();
+        $this->config_pays = $this->configLoader->getPays();
     }
 
     /**
      * @param $stake
      * @return array
+     * @throws \Exception
      */
     public function spin($stake): array
     {
         $this->stake = floatval($stake);
+        // validate the stake
+        if ($this->stake < 0.1 || $this->stake > 10) {
+            throw new \Exception("Stake must be between 0.1 and 10");
+        }
+
         $this->setRandomScreen();
         $this->evaluatePaylines();
 
         return [
             'screen' => $this->screen, // The 5x3 grid of symbols
             'details' => $this->details, // Details on any conversions that took place
-            'paylines' => $this->paylines_result, // Information on paylines that have won
+            'paylines' => $this->paylines, // Information on paylines that have won
         ];
     }
 
@@ -85,19 +102,18 @@ class SlotMachine
      */
     private function setRandomScreen(): void
     {
-        $screen = []; // This will hold the 5x3 grid of symbols
+        $this->screen = []; // This will hold the 5x3 grid of symbols
 
-        foreach ($this->reels as $reelIndex => $reel) {
+        foreach ($this->config_reels as $reelIndex => $reel) {
             $symbols = $reel->getSymbols();
-            $reelPosition = rand(0, count($symbols) - 1); // Random starting position for this reel
+            $symbolsCount = count($symbols);
+            $reelPosition = rand(0, $symbolsCount - 1); // Random starting position for this reel
 
             for ($col = 0; $col < 3; $col++) {
-                $position = ($reelPosition + $col) % count($symbols); // Wrap around if necessary
-                $screen[$reelIndex][$col] = $symbols[$position];
+                $position = ($reelPosition + $col) % $symbolsCount; // Wrap around if necessary
+                $this->screen[$reelIndex][$col] = $symbols[$position];
             }
         }
-
-        $this->screen = $screen;
     }
 
     /**
@@ -112,7 +128,7 @@ class SlotMachine
         /**
          * @var Payline $line
          */
-        foreach ($this->lines as $line) {
+        foreach ($this->config_lines as $line) {
             $prevSymbolId = null;
             $matchCount = 0;
             $matches = [];
@@ -124,14 +140,7 @@ class SlotMachine
                     $matchCount++;
                     $matches[] = $currentSymbol->id;
                 } else {
-                    if (count(array_unique($matches)) === 1 && $matchCount >= 3) {
-                        $wins[] = [
-                            'line' => $positions,
-                            'matches' => $matches,
-                            'count' => $matchCount,
-                            'moneyWon' => $this->lookupPayout($matches, $matchCount),
-                        ];
-                    }
+                    $this->checkForWin($wins, $matches, $matchCount, $positions);
                     // Reset for the next sequence of matches
                     $matches = [$currentSymbol->id];
                     $matchCount = 1;
@@ -139,18 +148,31 @@ class SlotMachine
                 $prevSymbolId = $currentSymbol->id;
             }
 
-            // Check if the last sequence of symbols forms a win
-            if (count(array_unique($matches)) === 1 && $matchCount >= 3) {
-                $wins[] = [
-                    'line' => $positions,
-                    'matches' => $matches,
-                    'count' => $matchCount,
-                    'moneyWon' => $this->lookupPayout($matches, $matchCount),
-                ];
-            }
+            // Check for a win after the loop
+            $this->checkForWin($wins, $matches, $matchCount, $positions);
         }
 
-        $this->paylines_result = $wins;
+        $this->paylines = $wins;
+    }
+
+    /**
+     * Checks if a sequence of symbols is a win and adds it to the wins array
+     * @param array $wins
+     * @param array $matches
+     * @param int $matchCount
+     * @param array $positions
+     * @return void
+     */
+    private function checkForWin(array &$wins, array $matches, int $matchCount, array $positions): void
+    {
+        if (count(array_unique($matches)) === 1 && $matchCount >= 3) {
+            $wins[] = [
+                'line' => $positions,
+                'matches' => $matches,
+                'count' => $matchCount,
+                'moneyWon' => $this->lookupPayout($matches, $matchCount),
+            ];
+        }
     }
 
     /**
@@ -160,22 +182,19 @@ class SlotMachine
     private function handleSpecialSymbols(): array
     {
         $details = [];
-        // Special symbol conversion, assuming ID 10 is the special symbol
         $conversionTarget = null;
-        foreach ($this->screen as $reel) {
-            foreach ($reel as $symbol) {
-                if ($symbol->id == 10 && !$conversionTarget) { // Find the first symbol for conversion
-                    continue;
-                } elseif ($conversionTarget === null) {
-                    $conversionTarget = $symbol->id; // Set conversion target to the first normal symbol found
-                    break;
-                }
-            }
-        }
 
         foreach ($this->screen as $reelIndex => $reel) {
-            foreach ($reel as $symbol) {
-                if ($symbol->id == 10) { // Convert special symbols
+            foreach ($reel as $symbolIndex => $symbol) {
+                $isMystery = $symbol->type == Symbol::TYPE_MYSTERY;
+                if ($isMystery) {
+                    if ($conversionTarget === null) {
+                        // Find the next non-special symbol in the screen
+                        $conversionTarget = $this->findNextNonSpecialSymbol($reelIndex, $symbolIndex);
+                        if ($conversionTarget === null) {
+                            continue; // If no non-special symbol is found, skip this symbol
+                        }
+                    }
                     $symbol->id = $conversionTarget;
                     $details[] = "Special symbol(10) converted to $conversionTarget";
                 }
@@ -183,6 +202,29 @@ class SlotMachine
         }
 
         return $details;
+    }
+
+    /**
+     * Find the first non-special symbol in the screen after the given position
+     * @param int $startReelIndex
+     * @param int $startSymbolIndex
+     * @return int|null
+     */
+    private function findNextNonSpecialSymbol(int $startReelIndex, int $startSymbolIndex): ?int
+    {
+        for ($reelIndex = $startReelIndex; $reelIndex < count($this->screen); $reelIndex++) {
+            // If we're on the starting reel, start from the next symbol in the reel
+            // to avoid converting the same symbol
+            $start = $reelIndex == $startReelIndex ? $startSymbolIndex + 1 : 0;
+            for ($symbolIndex = $start; $symbolIndex < count($this->screen[$reelIndex]); $symbolIndex++) {
+                // If the symbol is not special, return it
+                if ($this->screen[$reelIndex][$symbolIndex]->type != Symbol::TYPE_MYSTERY) {
+                    return $this->screen[$reelIndex][$symbolIndex]->id;
+                }
+            }
+        }
+
+        return null; // No non-special symbol found
     }
 
     /**
@@ -194,7 +236,7 @@ class SlotMachine
     private function lookupPayout($matches, $matchCount): float|int
     {
         $symbolId = $matches[0]; // All matches will be the same symbol
-        foreach ($this->pays as $pay) {
+        foreach ($this->config_pays as $pay) {
             if ($pay[0] == $symbolId && $pay[1] == $matchCount) {
                 // calculate the payout amount based on the stake
                 return $pay[2] * $this->stake;// Return the payout amount

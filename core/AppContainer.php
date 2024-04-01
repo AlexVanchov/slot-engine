@@ -9,7 +9,7 @@ namespace Core;
  */
 class AppContainer
 {
-    private static AppContainer $instance;
+    private static ?AppContainer $instance;
     private array $services = [];
 
     private function __construct()
@@ -22,7 +22,7 @@ class AppContainer
      */
     public static function getInstance(): AppContainer
     {
-        if (is_null(static::$instance)) {
+        if (!isset(static::$instance)) {
             static::$instance = new static();
         }
 

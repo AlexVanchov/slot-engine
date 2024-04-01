@@ -31,7 +31,7 @@
 <div class="row">
     <form action="/spin" method="POST">
 
-        <input type="number" name="stake" id="stake" value="<?= $_POST['stake'] ?? 1 ?>" step="0.01">
+        <input type="number" name="stake" id="stake" value="<?= $_POST['stake'] ?? 1 ?>" step="0.01" min="0.1" max="10">
         <button id="btn-spin">
             Spin
         </button>
@@ -60,6 +60,19 @@
             <p>Total money won: <?= $totalMoneyWon ?>$</p>
         <?php else: ?>
             <p>No paylines won</p>
+        <?php endif; ?>
+
+        <h2>Details</h2>
+        <?php if (!empty($result['details'])): ?>
+            <ul>
+                <?php foreach ($result['details'] as $detail): ?>
+                    <li>
+                        <?= $detail ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p>No details</p>
         <?php endif; ?>
     </div>
 </div>
