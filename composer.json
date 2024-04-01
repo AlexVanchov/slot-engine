@@ -15,5 +15,9 @@
         }
     ],
     "require": {
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.0",
+        "friendsofphp/php-cs-fixer": "*"
     }
 }
