@@ -104,9 +104,9 @@ class SlotMachine
     {
         $this->screen = []; // This will hold the 5x3 grid of symbols
 
-	    /**
-	     * @var Reel $reel
-	     */
+        /**
+         * @var Reel $reel
+         */
         foreach ($this->config_reels as $reelIndex => $reel) {
             $symbols = $reel->getSymbols();
             $symbolsCount = count($symbols);
@@ -193,9 +193,10 @@ class SlotMachine
                 if ($isMystery) {
                     if ($conversionTarget === null) {
                         // Find the next non-special symbol in the screen
-                        $conversionTarget = $this->findNextNonSpecialSymbol($reelIndex, $symbolIndex);
+                        $conversionTarget = $this->findClosestNonSpecialSymbol($reelIndex, $symbolIndex);
                         if ($conversionTarget === null) {
-                            continue; // If no non-special symbol is found, skip this symbol
+                            // If no non-special symbol is found, find the previous non-special symbol
+                            $conversionTarget = $this->findClosestNonSpecialSymbol($reelIndex, $symbolIndex, 'backward');
                         }
                     }
                     $symbol->id = $conversionTarget;
@@ -208,21 +209,34 @@ class SlotMachine
     }
 
     /**
-     * Find the first non-special symbol in the screen after the given position
+     * Find the neares non-special symbol in the screen
      * @param int $startReelIndex
      * @param int $startSymbolIndex
+     * @param string $direction
      * @return int|null
      */
-    private function findNextNonSpecialSymbol(int $startReelIndex, int $startSymbolIndex): ?int
+    private function findClosestNonSpecialSymbol(int $startReelIndex, int $startSymbolIndex, string $direction = 'forward'): ?int
     {
-        for ($reelIndex = $startReelIndex; $reelIndex < count($this->screen); $reelIndex++) {
-            // If we're on the starting reel, start from the next symbol in the reel
-            // to avoid converting the same symbol
-            $start = $reelIndex == $startReelIndex ? $startSymbolIndex + 1 : 0;
-            for ($symbolIndex = $start; $symbolIndex < count($this->screen[$reelIndex]); $symbolIndex++) {
-                // If the symbol is not special, return it
-                if ($this->screen[$reelIndex][$symbolIndex]->type != Symbol::TYPE_MYSTERY) {
-                    return $this->screen[$reelIndex][$symbolIndex]->id;
+        $reels = $direction === 'backward' ? array_reverse($this->screen, true) : $this->screen;
+        foreach ($reels as $reelIndex => $reel) {
+            if ($direction === 'backward' && $reelIndex > $startReelIndex) {
+                continue;
+            }
+            if ($direction === 'forward' && $reelIndex < $startReelIndex) {
+                continue;
+            }
+
+            $symbols = $direction === 'backward' ? array_reverse($reel) : $reel;
+            foreach ($symbols as $symbolIndex => $symbol) {
+                if ($reelIndex == $startReelIndex && $direction === 'backward' && $symbolIndex >= $startSymbolIndex) {
+                    continue;
+                }
+                if ($reelIndex == $startReelIndex && $direction === 'forward' && $symbolIndex <= $startSymbolIndex) {
+                    continue;
+                }
+
+                if ($symbol->type != Symbol::TYPE_MYSTERY) {
+                    return $symbol->id;
                 }
             }
         }
