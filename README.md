@@ -19,6 +19,10 @@ Point your web server to the web directory.
 
 ### Usage
 To play the slots game, simply go to the home page localhost/spin, where you will be presented with a base user interface to place bets and spin the slots. The core game logic will calculate wins based on the slot stake and it will show paylines, pattern matched, details about mystery(wild) symbol replacements, etc...
+### Demo  
+![image](https://github.com/AlexVanchov/slot-engine/assets/36050251/785b8805-fd7a-4c7a-9265-a2692dc41ce5)
+![image](https://github.com/AlexVanchov/slot-engine/assets/36050251/ffc5da02-66c1-4553-b532-8cf2d1f5ea38)
+
 
 ## Development
 This project is structured as follows:
